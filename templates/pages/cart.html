@@ -1,0 +1,279 @@
+{% extends "webshop/templates/pages/cart.html" %}
+
+{% block page_content %}
+    {{ super() }}
+    
+    <!-- Add delivery area selector to cart page -->
+    <div class="delivery-area-cart">
+        <h4>
+            <i class="fa fa-truck"></i> 
+            <span class="english-text">Select Delivery Area</span>
+            <span class="arabic-text" style="display:none;">اختر منطقة التوصيل</span>
+        </h4>
+        <p class="english-text text-muted">Delivery charges apply to all orders. Select your area to see the delivery charge.</p>
+        <p class="arabic-text text-muted" style="display:none;">رسوم التوصيل تنطبق على جميع الطلبات. اختر منطقتك لرؤية رسوم التوصيل.</p>
+        
+        <div class="form-group">
+            <select class="form-control" id="cart-delivery-area">
+                <option value="">
+                    <span class="english-text">-- Select Area --</span>
+                    <span class="arabic-text" style="display:none;">-- اختر المنطقة --</span>
+                </option>
+                {% for area in delivery_areas %}
+                <option value="{{ area.area_code }}" data-charge="{{ area.delivery_charge }}">
+                    {{ area.area_name }} - KWD {{ area.delivery_charge }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div id="cart-delivery-summary" class="mt-3 p-3 bg-light rounded" style="display: none;">
+            <div class="delivery-info">
+                <span>
+                    <strong class="english-text">Delivery to:</strong> 
+                    <strong class="arabic-text" style="display:none;">التوصيل إلى:</strong> 
+                    <span id="cart-selected-area"></span>
+                </span>
+                <span class="delivery-charge-badge">KWD <span id="cart-delivery-charge">0.000</span></span>
+            </div>
+            <small class="text-muted">
+                <i class="fa fa-clock"></i> 
+                <span class="english-text">Estimated delivery:</span> 
+                <span class="arabic-text" style="display:none;">التوصيل المتوقع:</span> 
+                <span id="cart-delivery-time"></span>
+            </small>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Language toggle functionality
+        const languageToggle = document.createElement('div');
+        languageToggle.className = 'language-toggle text-end mb-3';
+        languageToggle.innerHTML = `
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="cart-lang-toggle">
+                <i class="fa fa-globe"></i> 
+                <span class="current-lang">English</span>
+            </button>
+        `;
+        
+        // Insert language toggle at the top of delivery area section
+        const deliverySection = document.querySelector('.delivery-area-cart');
+        deliverySection.insertBefore(languageToggle, deliverySection.firstChild);
+        
+        let currentLanguage = 'english';
+        
+        // Toggle language
+        document.getElementById('cart-lang-toggle').addEventListener('click', function() {
+            currentLanguage = currentLanguage === 'english' ? 'arabic' : 'english';
+            updateLanguage();
+        });
+        
+        function updateLanguage() {
+            const englishTexts = document.querySelectorAll('.english-text');
+            const arabicTexts = document.querySelectorAll('.arabic-text');
+            const currentLangSpan = document.querySelector('.current-lang');
+            
+            if (currentLanguage === 'arabic') {
+                englishTexts.forEach(el => el.style.display = 'none');
+                arabicTexts.forEach(el => el.style.display = 'inline');
+                currentLangSpan.textContent = 'العربية';
+                document.body.dir = 'rtl';
+            } else {
+                englishTexts.forEach(el => el.style.display = 'inline');
+                arabicTexts.forEach(el => el.style.display = 'none');
+                currentLangSpan.textContent = 'English';
+                document.body.dir = 'ltr';
+            }
+        }
+        
+        const areaSelect = document.getElementById('cart-delivery-area');
+        if (areaSelect) {
+            areaSelect.addEventListener('change', async function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const areaCode = this.value;
+                const charge = selectedOption.dataset.charge || 0;
+                
+                if (!areaCode) {
+                    document.getElementById('cart-delivery-summary').style.display = 'none';
+                    // Remove delivery charge from cart
+                    if (window.deliveryAreaManager) {
+                        await window.deliveryAreaManager.removeDeliveryCharge();
+                    }
+                    return;
+                }
+                
+                // Update UI
+                const areaName = selectedOption.textContent.split(' - ')[0];
+                document.getElementById('cart-selected-area').textContent = areaName;
+                document.getElementById('cart-delivery-charge').textContent = parseFloat(charge).toFixed(3);
+                document.getElementById('cart-delivery-time').textContent = selectedOption.textContent.match(/\(([^)]+)\)/)?.[1] || '2-3 hours';
+                document.getElementById('cart-delivery-summary').style.display = 'block';
+                
+                // Update cart with delivery charge
+                try {
+                    const response = await fetch('/api/method/sa7ba_custom.api.update_cart_delivery', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Frappe-CSRF-Token': frappe.csrf_token
+                        },
+                        body: JSON.stringify({
+                            area_code: areaCode,
+                            delivery_charge: charge
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Refresh cart display
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        console.error('Failed to update cart:', result.error);
+                        alert(currentLanguage === 'arabic' ? 'فشل في تحديث السلة. يرجى المحاولة مرة أخرى.' : 'Failed to update cart. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Failed to update cart:', error);
+                    alert(currentLanguage === 'arabic' ? 'فشل في تحديث السلة. يرجى المحاولة مرة أخرى.' : 'Failed to update cart. Please try again.');
+                }
+            });
+            
+            // Restore selected area from session
+            const savedArea = sessionStorage.getItem('selected_delivery_area');
+            if (savedArea) {
+                setTimeout(() => {
+                    areaSelect.value = savedArea;
+                    areaSelect.dispatchEvent(new Event('change'));
+                }, 500);
+            }
+        }
+    });
+    </script>
+    
+    <style>
+    .delivery-area-cart {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 25px;
+        margin-top: 30px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .delivery-area-cart h4 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .delivery-area-cart .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .delivery-area-cart .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    #cart-delivery-summary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    
+    .delivery-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .delivery-info strong {
+        color: white;
+    }
+    
+    .delivery-charge-badge {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    #cart-delivery-summary .text-muted {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+    
+    /* Language Toggle Styles */
+    .language-toggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+    }
+    
+    /* RTL Support for Arabic */
+    [dir="rtl"] .delivery-area-cart h4 {
+        flex-direction: row-reverse;
+    }
+    
+    [dir="rtl"] .delivery-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    [dir="rtl"] .delivery-charge-badge {
+        align-self: flex-end;
+    }
+    
+    [dir="rtl"] .language-toggle {
+        left: 10px;
+        right: auto;
+    }
+    
+    @media (max-width: 768px) {
+        .delivery-area-cart {
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .delivery-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .delivery-charge-badge {
+            align-self: flex-end;
+        }
+        
+        .language-toggle {
+            position: relative;
+            top: auto;
+            right: auto;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        [dir="rtl"] .language-toggle {
+            left: auto;
+            right: auto;
+        }
+    }
+    </style>
+{% endblock %}

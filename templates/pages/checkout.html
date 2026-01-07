@@ -1,0 +1,692 @@
+{% extends "webshop/templates/pages/checkout.html" %}
+
+{% block page_content %}
+<div class="checkout-container">
+    <!-- Checkout Method Selection -->
+    <div class="checkout-method-selector mb-4">
+        <h3 class="text-center mb-4">
+            <span class="english-text">Choose Checkout Method</span>
+            <span class="arabic-text" style="display:none;">اختر طريقة الدفع</span>
+        </h3>
+        
+        <div class="toggle-container">
+            <div class="toggle-buttons">
+                <button type="button" class="toggle-btn active" id="guest-toggle">
+                    <span class="english-text">Guest Checkout</span>
+                    <span class="arabic-text" style="display:none;">الدفع كضيف</span>
+                </button>
+                <button type="button" class="toggle-btn" id="account-toggle">
+                    <span class="english-text">Account Checkout</span>
+                    <span class="arabic-text" style="display:none;">الدفع بالحساب</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Guest Checkout Section -->
+    <div id="guest-checkout-section" class="checkout-section">
+        <div class="guest-checkout-highlight">
+            <h5>
+                <i class="fa fa-user-secret"></i>
+                <span class="english-text">Checkout as Guest</span>
+                <span class="arabic-text" style="display:none;">الدفع كضيف</span>
+            </h5>
+            <p class="english-text">Complete your purchase without creating an account. We'll email your order details.</p>
+            <p class="arabic-text" style="display:none;">أكمل عملية الشراء دون إنشاء حساب. سنرسل تفاصيل طلبك عبر البريد الإلكتروني.</p>
+        </div>
+        
+        <form id="guest-checkout-form" class="mt-4">
+            <!-- Personal Information -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="guest_email" class="form-label">
+                        <span class="english-text">Email Address *</span>
+                        <span class="arabic-text" style="display:none;">البريد الإلكتروني *</span>
+                    </label>
+                    <input type="email" id="guest_email" name="guest_email" 
+                           class="form-control" required 
+                           placeholder="your@email.com">
+                    <div class="invalid-feedback">
+                        <span class="english-text">Please provide a valid email address.</span>
+                        <span class="arabic-text" style="display:none;">يرجى تقديم عنوان بريد إلكتروني صالح.</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="guest_phone" class="form-label">
+                        <span class="english-text">Mobile Number *</span>
+                        <span class="arabic-text" style="display:none;">رقم الهاتف المحمول *</span>
+                    </label>
+                    <input type="tel" id="guest_phone" name="guest_phone" 
+                           class="form-control" required 
+                           placeholder="5xxxxxxxx">
+                    <div class="invalid-feedback">
+                        <span class="english-text">Please provide a valid mobile number.</span>
+                        <span class="arabic-text" style="display:none;">يرجى تقديم رقم هاتف محمول صالح.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="guest_first_name" class="form-label">
+                        <span class="english-text">First Name *</span>
+                        <span class="arabic-text" style="display:none;">الاسم الأول *</span>
+                    </label>
+                    <input type="text" id="guest_first_name" name="guest_first_name" 
+                           class="form-control" required>
+                    <div class="invalid-feedback">
+                        <span class="english-text">First name is required.</span>
+                        <span class="arabic-text" style="display:none;">الاسم الأول مطلوب.</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="guest_last_name" class="form-label">
+                        <span class="english-text">Last Name (Optional)</span>
+                        <span class="arabic-text" style="display:none;">الاسم الأخير (اختياري)</span>
+                    </label>
+                    <input type="text" id="guest_last_name" name="guest_last_name" 
+                           class="form-control">
+                </div>
+            </div>
+            
+            <!-- Delivery Area Selection -->
+            <div id="delivery-area-container"></div>
+            
+            <!-- Address Section -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label for="guest_address" class="form-label">
+                        <span class="english-text">Delivery Address *</span>
+                        <span class="arabic-text" style="display:none;">عنوان التوصيل *</span>
+                    </label>
+                    <textarea id="guest_address" name="guest_address" 
+                              class="form-control" rows="3" required
+                              placeholder="Enter your complete delivery address"></textarea>
+                    <div class="invalid-feedback">
+                        <span class="english-text">Delivery address is required.</span>
+                        <span class="arabic-text" style="display:none;">عنوان التوصيل مطلوب.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Optional Save Info -->
+            <div class="form-check mb-4">
+                <input type="checkbox" id="save_info" name="save_info" class="form-check-input">
+                <label for="save_info" class="form-check-label">
+                    <span class="english-text">Save my information for faster checkout next time</span>
+                    <span class="arabic-text" style="display:none;">احفظ معلوماتي لتسجيل خروج أسرع في المرة القادمة</span>
+                </label>
+            </div>
+            
+            <!-- Terms and Conditions -->
+            <div class="form-check mb-4">
+                <input type="checkbox" id="terms_accept" name="terms_accept" class="form-check-input" required>
+                <label for="terms_accept" class="form-check-label">
+                    <span class="english-text">I agree to the <a href="/terms" target="_blank">Terms and Conditions</a> *</span>
+                    <span class="arabic-text" style="display:none;">أوافق على <a href="/terms" target="_blank">الشروط والأحكام</a> *</span>
+                </label>
+                <div class="invalid-feedback">
+                    <span class="english-text">You must accept the terms and conditions.</span>
+                    <span class="arabic-text" style="display:none;">يجب أن تقبل الشروط والأحكام.</span>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg w-100" id="guest-checkout-submit">
+                <span class="submit-text">
+                    <span class="english-text">Continue to Payment</span>
+                    <span class="arabic-text" style="display:none;">المتابعة للدفع</span>
+                </span>
+                <span class="loading-spinner" style="display: none;"></span>
+            </button>
+        </form>
+    </div>
+    
+    <!-- Account Checkout Section -->
+    <div id="account-checkout-section" class="checkout-section" style="display: none;">
+        <div class="account-checkout-highlight">
+            <h5>
+                <i class="fa fa-user"></i>
+                <span class="english-text">Checkout with Account</span>
+                <span class="arabic-text" style="display:none;">الدفع بالحساب</span>
+            </h5>
+            <p class="english-text">Sign in to your account for faster checkout and order tracking.</p>
+            <p class="arabic-text" style="display:none;">سجل الدخول إلى حسابك لتسجيل خروج أسرع وتتبع الطلبات.</p>
+        </div>
+        
+        <!-- Login Form -->
+        <div class="login-form-container">
+            <form id="account-login-form">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="login_email" class="form-label">
+                            <span class="english-text">Email Address</span>
+                            <span class="arabic-text" style="display:none;">البريد الإلكتروني</span>
+                        </label>
+                        <input type="email" id="login_email" name="login_email" 
+                               class="form-control" placeholder="your@email.com">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="login_password" class="form-label">
+                            <span class="english-text">Password</span>
+                            <span class="arabic-text" style="display:none;">كلمة المرور</span>
+                        </label>
+                        <input type="password" id="login_password" name="login_password" 
+                               class="form-control" placeholder="Enter your password">
+                    </div>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input type="checkbox" id="remember_me" name="remember_me" class="form-check-input">
+                    <label for="remember_me" class="form-check-label">
+                        <span class="english-text">Remember me</span>
+                        <span class="arabic-text" style="display:none;">تذكرني</span>
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-outline-primary btn-lg w-100 mb-3">
+                    <span class="english-text">Sign In</span>
+                    <span class="arabic-text" style="display:none;">تسجيل الدخول</span>
+                </button>
+                
+                <div class="text-center">
+                    <a href="/forgot-password" class="text-primary">
+                        <span class="english-text">Forgot your password?</span>
+                        <span class="arabic-text" style="display:none;">نسيت كلمة المرور؟</span>
+                    </a>
+                </div>
+            </form>
+            
+            <hr class="my-4">
+            
+            <div class="text-center">
+                <p class="english-text">Don't have an account?</p>
+                <p class="arabic-text" style="display:none;">ليس لديك حساب؟</p>
+                <a href="/signup" class="btn btn-success">
+                    <span class="english-text">Create Account</span>
+                    <span class="arabic-text" style="display:none;">إنشاء حساب</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Language toggle functionality
+    const languageToggle = document.createElement('div');
+    languageToggle.className = 'language-toggle text-end mb-3';
+    languageToggle.innerHTML = `
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="lang-toggle">
+            <i class="fa fa-globe"></i> 
+            <span class="current-lang">English</span>
+        </button>
+    `;
+    
+    // Insert language toggle at the top
+    const container = document.querySelector('.checkout-container');
+    container.insertBefore(languageToggle, container.firstChild);
+    
+    let currentLanguage = 'english';
+    
+    // Toggle language
+    document.getElementById('lang-toggle').addEventListener('click', function() {
+        currentLanguage = currentLanguage === 'english' ? 'arabic' : 'english';
+        updateLanguage();
+    });
+    
+    function updateLanguage() {
+        const englishTexts = document.querySelectorAll('.english-text');
+        const arabicTexts = document.querySelectorAll('.arabic-text');
+        const currentLangSpan = document.querySelector('.current-lang');
+        
+        if (currentLanguage === 'arabic') {
+            englishTexts.forEach(el => el.style.display = 'none');
+            arabicTexts.forEach(el => el.style.display = 'inline');
+            currentLangSpan.textContent = 'العربية';
+            document.body.dir = 'rtl';
+        } else {
+            englishTexts.forEach(el => el.style.display = 'inline');
+            arabicTexts.forEach(el => el.style.display = 'none');
+            currentLangSpan.textContent = 'English';
+            document.body.dir = 'ltr';
+        }
+    }
+    
+    // Checkout method toggle functionality
+    const guestToggle = document.getElementById('guest-toggle');
+    const accountToggle = document.getElementById('account-toggle');
+    const guestSection = document.getElementById('guest-checkout-section');
+    const accountSection = document.getElementById('account-checkout-section');
+    
+    guestToggle.addEventListener('click', function() {
+        showGuestCheckout();
+    });
+    
+    accountToggle.addEventListener('click', function() {
+        showAccountCheckout();
+    });
+    
+    function showGuestCheckout() {
+        guestToggle.classList.add('active');
+        accountToggle.classList.remove('active');
+        guestSection.style.display = 'block';
+        accountSection.style.display = 'none';
+    }
+    
+    function showAccountCheckout() {
+        guestToggle.classList.remove('active');
+        accountToggle.classList.add('active');
+        guestSection.style.display = 'none';
+        accountSection.style.display = 'block';
+    }
+    
+    // Guest checkout form handling
+    const guestForm = document.getElementById('guest-checkout-form');
+    const submitBtn = document.getElementById('guest-checkout-submit');
+    
+    if (guestForm) {
+        guestForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!window.deliveryAreaManager.validateGuestForm()) {
+                return;
+            }
+            
+            // Check if delivery area is selected
+            const selectedArea = document.getElementById('delivery-area-select').value;
+            if (!selectedArea) {
+                window.deliveryAreaManager.showError(currentLanguage === 'arabic' ? 'يرجى اختيار منطقة التوصيل' : 'Please select a delivery area');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.querySelector('.submit-text').style.display = 'none';
+            submitBtn.querySelector('.loading-spinner').style.display = 'inline-block';
+            
+            try {
+                // Collect guest information
+                const guestInfo = {
+                    email: document.getElementById('guest_email').value,
+                    phone: document.getElementById('guest_phone').value,
+                    first_name: document.getElementById('guest_first_name').value,
+                    last_name: document.getElementById('guest_last_name').value,
+                    address: document.getElementById('guest_address').value,
+                    save_info: document.getElementById('save_info').checked,
+                    delivery_area: selectedArea
+                };
+                
+                // Process guest checkout
+                const result = await window.deliveryAreaManager.processGuestCheckout(guestInfo);
+                
+                if (result.success) {
+                    // Redirect to payment or continue with normal checkout flow
+                    window.location.href = '/checkout/payment';
+                } else {
+                    throw new Error(result.error || 'Checkout failed');
+                }
+                
+            } catch (error) {
+                console.error('Guest checkout error:', error);
+                window.deliveryAreaManager.showError(error.message || (currentLanguage === 'arabic' ? 'فشل في الدفع. يرجى المحاولة مرة أخرى.' : 'Checkout failed. Please try again.'));
+                
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.querySelector('.submit-text').style.display = 'inline';
+                submitBtn.querySelector('.loading-spinner').style.display = 'none';
+            }
+        });
+        
+        // Form validation on input
+        const inputs = guestForm.querySelectorAll('input[required], textarea[required]');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.checkValidity()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                }
+            });
+        });
+    }
+    
+    // Account login form handling
+    const accountForm = document.getElementById('account-login-form');
+    if (accountForm) {
+        accountForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('login_email').value;
+            const password = document.getElementById('login_password').value;
+            const rememberMe = document.getElementById('remember_me').checked;
+            
+            if (!email || !password) {
+                window.deliveryAreaManager.showError(currentLanguage === 'arabic' ? 'يرجى إدخال البريد الإلكتروني وكلمة المرور' : 'Please enter email and password');
+                return;
+            }
+            
+            try {
+                // Submit login form via Frappe's login method
+                const response = await fetch('/api/method/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Frappe-CSRF-Token': frappe.csrf_token
+                    },
+                    body: JSON.stringify({
+                        usr: email,
+                        pwd: password
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.message === 'Logged In') {
+                    // Redirect to checkout or refresh page
+                    window.location.reload();
+                } else {
+                    throw new Error(result.message || 'Login failed');
+                }
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                window.deliveryAreaManager.showError(error.message || (currentLanguage === 'arabic' ? 'فشل في تسجيل الدخول. يرجى المحاولة مرة أخرى.' : 'Login failed. Please try again.'));
+            }
+        });
+    }
+    
+    // Initialize delivery area manager
+    if (window.deliveryAreaManager) {
+        window.deliveryAreaManager.init();
+    }
+});
+</script>
+
+<style>
+/* Language Toggle Styles */
+.language-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+/* Checkout Method Toggle Styles */
+.checkout-method-selector {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.checkout-method-selector h3 {
+    color: #2c3e50;
+    font-weight: 700;
+    margin-bottom: 25px;
+    font-size: 1.5rem;
+}
+
+.toggle-container {
+    display: flex;
+    justify-content: center;
+}
+
+.toggle-buttons {
+    display: flex;
+    background: #ffffff;
+    border-radius: 50px;
+    padding: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.toggle-btn {
+    padding: 12px 30px;
+    border: none;
+    background: transparent;
+    color: #6c757d;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+    min-width: 150px;
+}
+
+.toggle-btn.active {
+    color: white;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.toggle-btn:hover:not(.active) {
+    color: #495057;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+/* Checkout Section Styles */
+.checkout-section {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.guest-checkout-highlight, .account-checkout-highlight {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    border-left: 4px solid #ff6b6b;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 0 12px 12px 0;
+}
+
+.account-checkout-highlight {
+    background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+    border-left: 4px solid #28a745;
+}
+
+.guest-checkout-highlight h5, .account-checkout-highlight h5 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.guest-checkout-highlight p, .account-checkout-highlight p {
+    color: #6c757d;
+    margin-bottom: 0;
+    font-size: 1rem;
+}
+
+/* Form Styles */
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn-outline-primary {
+    border: 2px solid #667eea;
+    color: #667eea;
+    border-radius: 12px;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: transparent;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ffffff;
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.form-check-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* RTL Support for Arabic */
+[dir="rtl"] .checkout-method-selector {
+    text-align: right;
+}
+
+[dir="rtl"] .toggle-buttons {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .guest-checkout-highlight,
+[dir="rtl"] .account-checkout-highlight {
+    border-left: none;
+    border-right: 4px solid #ff6b6b;
+    border-radius: 12px 0 0 12px;
+}
+
+[dir="rtl"] .account-checkout-highlight {
+    border-right-color: #28a745;
+}
+
+[dir="rtl"] .guest-checkout-highlight h5,
+[dir="rtl"] .account-checkout-highlight h5 {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .language-toggle {
+    left: 10px;
+    right: auto;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .checkout-method-selector {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .checkout-section {
+        padding: 20px;
+    }
+    
+    .toggle-btn {
+        padding: 10px 20px;
+        min-width: 120px;
+        font-size: 0.9rem;
+    }
+    
+    .checkout-method-selector h3 {
+        font-size: 1.3rem;
+    }
+    
+    .language-toggle {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    
+    [dir="rtl"] .language-toggle {
+        left: auto;
+        right: auto;
+    }
+}
+
+/* Form Validation Styles */
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    padding-right: calc(1.5em + 0.75rem);
+}
+
+.form-control.is-valid {
+    border-color: #28a745;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    padding-right: calc(1.5em + 0.75rem);
+}
+
+[dir="rtl"] .form-control.is-invalid,
+[dir="rtl"] .form-control.is-valid {
+    background-position: left calc(0.375em + 0.1875rem) center;
+    padding-left: calc(1.5em + 0.75rem);
+    padding-right: 0.75rem;
+}
+</style>
+{% endblock %}
